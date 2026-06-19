@@ -49,19 +49,34 @@
       const errorDiv = document.getElementById('error');
       errorDiv.style.display = 'none';
 
-      // FIXED: Point directly to the raw contents domain with a unique hash token to smash through the CDN cache
-      const uniqueToken = new Date().getTime();
-      const rawUrl = `https://raw.githubusercontent.com/salihdf6/secure-vault/main/encrypted_data.json?nocache=${uniqueToken}`;
+      // STEP 1: Look at the commit log history metadata of the file. 
+      // This is CORS friendly and updates instantly the millisecond a change is pushed!
+      const cacheBuster = new Date().getTime();
+      const metaUrl = `https://api.github.com/repos/salihdf6/secure-vault/commits?path=encrypted_data.json&cb=${cacheBuster}`;
 
       try {
-        // We include a cache setting instruction in the browser fetch request directly
-        let response = await fetch(rawUrl, { 
-          cache: "no-store",
-          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
-        });
+        let metaResponse = await fetch(metaUrl, { cache: "no-store" });
+        let commits = await metaResponse.json();
         
-        let fileData = await response.json();
-        let targetFolderUrl = decryptWithAES(fileData.data, inputKey);
+        if (!commits || commits.length === 0) {
+          alert("Could not find any data file history inside repository.");
+          return;
+        }
+
+        // Grab the precise, latest unique commit hash value
+        const latestCommitSha = commits[0].sha;
+
+        // STEP 2: Fetch the file pointing directly to that exact commit version. 
+        // This stops GitHub from serving cached versions because the URL is completely unique every time!
+        const fileUrl = `https://api.github.com/repos/salihdf6/secure-vault/contents/encrypted_data.json?ref=${latestCommitSha}`;
+        
+        let fileResponse = await fetch(fileUrl, { cache: "no-store" });
+        let fileMeta = await fileResponse.json();
+        
+        // Base64 decode GitHub's API response wrapper payload safely
+        let rawJsonContent = JSON.parse(atob(fileMeta.content.replace(/\n/g, '')));
+        
+        let targetFolderUrl = decryptWithAES(rawJsonContent.data, inputKey);
         
         if (targetFolderUrl) {
           window.location.href = targetFolderUrl;
@@ -70,7 +85,8 @@
           document.getElementById('vaultKey').value = '';
         }
       } catch (error) {
-        alert("Error fetching live data. Check internet connection.");
+        console.error(error);
+        alert("Error pulling live workspace path from repository layout.");
       }
     }
   </script>
