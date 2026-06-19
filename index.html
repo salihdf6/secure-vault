@@ -32,18 +32,18 @@
       const errorDiv = document.getElementById('error');
       errorDiv.style.display = 'none';
 
-      // Verify the hardcoded passcode door lock
+      // Verify passcode entry
       if (inputKey === "1216") {
         // Look at the web link scanned by the camera and parse out the folder parameter
         const urlParams = new URLSearchParams(window.location.search);
         const folderName = urlParams.get('folder');
 
         if (folderName) {
-          // Construct the deep link to the brand new specific subfolder instantly!
+          // FIXED PATHWAY: Point directly to the specific inner directory node inside the sandbox container
           const targetUrl = `shareddocuments://com.apple.CloudDocs/Documents/Scriptable/Patient_Vault/${encodeURIComponent(folderName)}`;
           window.location.href = targetUrl;
         } else {
-          // Fallback if accessed without a QR code parameter
+          // Fallback if accessed without an explicit subfolder query matching data
           window.location.href = `shareddocuments://com.apple.CloudDocs/Documents/Scriptable/Patient_Vault`;
         }
       } else {
