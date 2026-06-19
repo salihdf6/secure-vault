@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Include Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <!-- Paste your HTML Form code here (the same form you had in Scriptable) -->
+  
+  <script>
+    // 1. Initialize Supabase
+    const supabase = supabase.createClient('YOUR_URL_HERE', 'YOUR_ANON_KEY_HERE');
+
+    // 2. Updated Submit Function
+    async function executeSubmit() {
+      const data = {
+        name: document.getElementById('pName').value,
+        file_no: document.getElementById('pFileNo').value,
+        // ... add all other fields here ...
+      };
+
+      const { error } = await supabase.from('patients').insert([data]);
+      
+      if (error) {
+        alert("Error: " + error.message);
+      } else {
+        alert("Success! Data saved to cloud.");
+      }
+    }
+  </script>
+</body>
+</html>
