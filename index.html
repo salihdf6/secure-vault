@@ -27,7 +27,6 @@
   </div>
 
   <script>
-    // Decryption setup helper 
     function decryptWithAES(cipherText, typedKey) {
       try {
         const rawPayload = atob(cipherText);
@@ -35,7 +34,6 @@
         const cleanUrlBase64 = parts[0];
         const encryptedSecretKeyBase64 = parts[1];
         
-        // Match the base64 encrypted secret key against what the user typed
         if (atob(encryptedSecretKeyBase64) === typedKey) {
           return atob(cleanUrlBase64);
         } else {
@@ -51,18 +49,18 @@
       const errorDiv = document.getElementById('error');
       errorDiv.style.display = 'none';
 
-      // Cache-buster forces GitHub to serve the real, live file you just generated
-      const cacheBuster = new Date().getTime();
-      const githubUrl = `https://api.github.com/repos/salihdf6/secure-vault/contents/encrypted_data.json?cb=${cacheBuster}`;
+      // FIXED: Point directly to the raw contents domain with a unique hash token to smash through the CDN cache
+      const uniqueToken = new Date().getTime();
+      const rawUrl = `https://raw.githubusercontent.com/salihdf6/secure-vault/main/encrypted_data.json?nocache=${uniqueToken}`;
 
       try {
-        let response = await fetch(githubUrl, {
-          headers: { "Accept": "application/vnd.github.v3.raw" }
+        // We include a cache setting instruction in the browser fetch request directly
+        let response = await fetch(rawUrl, { 
+          cache: "no-store",
+          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
         });
         
         let fileData = await response.json();
-        
-        // Attempt decryption using the password you actually typed in the box
         let targetFolderUrl = decryptWithAES(fileData.data, inputKey);
         
         if (targetFolderUrl) {
@@ -72,7 +70,7 @@
           document.getElementById('vaultKey').value = '';
         }
       } catch (error) {
-        alert("Error pulling live data wrapper files from repository.");
+        alert("Error fetching live data. Check internet connection.");
       }
     }
   </script>
