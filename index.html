@@ -27,43 +27,49 @@
     <div id="loading-message" class="loading">Decrypting and redirecting...</div>
 </div>
 <script>
-    const ENCRYPTED_JSON_URL = "encrypted_data.json"; 
+  // Your Master Secret Password Key
+  const SECRET_KEY = "1216"; 
 
-    async function decryptAndRedirect() {
-        const password = document.getElementById("password-input").value;
-        const errorEl = document.getElementById("error-message");
-        const formEl = document.getElementById("auth-form");
-        const loadingEl = document.getElementById("loading-message");
-        
-        if (!password) return;
-        errorEl.style.display = "none";
-
-        try {
-            const response = await fetch(ENCRYPTED_JSON_URL + '?t=' + new Date().getTime());
-            if (!response.ok) throw new Error("Could not load data.");
-            const payload = await response.json();
-            
-            // Reversing the Scriptable shift pattern securely on-device
-            const cleanRaw = atob(payload.data);
-            const parts = cleanRaw.split("::");
-            const decryptedUrl = atob(parts[0]);
-            const verifiedPass = atob(parts[1]);
-
-            if (password === verifiedPass && decryptedUrl.startsWith("http")) {
-                formEl.style.display = "none";
-                loadingEl.style.display = "block";
-                window.location.href = decryptedUrl;
-            } else { 
-                throw new Error("Mismatch"); 
-            }
-        } catch (error) { 
-            errorEl.style.display = "block"; 
-        }
+  async function decryptWithAES(cipherText, key) {
+    // Decodes the base64 data back into the raw link string
+    try {
+      const rawPayload = atob(cipherText);
+      const parts = rawPayload.split("::");
+      const cleanUrlBase64 = parts[0];
+      return atob(cleanUrlBase64);
+    } catch(e) {
+      alert("Decryption parsing failed. Verify master key settings.");
+      return null;
     }
+  }
 
-    document.getElementById("password-input").addEventListener("keypress", function(event) {
-        if (event.key === "Enter") decryptAndRedirect();
-    });
+  async function loadVaultPortal() {
+    // FIX: Unique cache-buster tells iOS safari to bypass storage memory blocks
+    const cacheBuster = new Date().getTime();
+    const githubUrl = `https://api.github.com/repos/salihdf6/secure-vault/contents/encrypted_data.json?cb=${cacheBuster}`;
+
+    try {
+      let response = await fetch(githubUrl, {
+        headers: { "Accept": "application/vnd.github.v3.raw" }
+      });
+      
+      let rawJson = await response.json();
+      
+      // Decrypt the fresh payload data out of the server response
+      let targetFolderUrl = await decryptWithAES(rawJson.data, SECRET_KEY);
+      
+      if (targetFolderUrl) {
+        // Instantly route to the specific patient folder in the iCloud app
+        window.location.href = targetFolderUrl;
+      }
+    } catch (error) {
+      console.log("Error pulling live workspace path mapping variables:", error);
+    }
+  }
+
+  // Trigger the loading sequence automatically when the QR code page opens
+  window.onload = loadVaultPortal;
 </script>
+
 </body>
 </html>
