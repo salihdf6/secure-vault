@@ -19,10 +19,10 @@
 
   <div class="vault-card">
     <h2>Secure Vault Portal</h2>
-    <p>Enter master passcode to unlock shared patient workspaces.</p>
+    <p>Enter passcode to unlock this patient's direct folder workspace.</p>
     
     <input type="password" id="vaultKey" placeholder="••••" maxlength="8">
-    <button onclick="unlockPortal()">Unlock Vault</button>
+    <button onclick="unlockPortal()">Unlock Workspace</button>
     <div class="error-msg" id="error">Invalid passcode. Access denied.</div>
   </div>
 
@@ -33,13 +33,16 @@
       errorDiv.style.display = 'none';
 
       if (inputKey === "1216") {
-        
-        // PASTE YOUR COPIED ICLOUD SHARED LINK IN THE QUOTES BELOW:
-        const masterSharedVaultUrl = "https://www.icloud.com/iclouddrive/0f3OhHIK6zpTfV1Sg0Tox_IRA#Patient_Vault";
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetParam = urlParams.get('target');
 
-        // Route the browser straight to your shared directory canvas
-        window.location.href = masterSharedVaultUrl;
-
+        if (targetParam) {
+          // Decode the direct-access folder destination link securely
+          const directDropboxFolder = atob(targetParam);
+          window.location.href = directDropboxFolder;
+        } else {
+          alert("Error: No folder data parameters located inside this scan profile.");
+        }
       } else {
         errorDiv.style.display = 'block';
         document.getElementById('vaultKey').value = '';
