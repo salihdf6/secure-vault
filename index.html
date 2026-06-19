@@ -19,10 +19,10 @@
 
   <div class="vault-card">
     <h2>Secure Vault Portal</h2>
-    <p>Enter master passcode to unlock patient workspace links.</p>
+    <p>Enter master passcode to unlock this patient's direct folder workspace.</p>
     
     <input type="password" id="vaultKey" placeholder="••••" maxlength="8">
-    <button onclick="unlockPortal()">Unlock Vault</button>
+    <button onclick="unlockPortal()">Unlock Workspace</button>
     <div class="error-msg" id="error">Invalid passcode. Access denied.</div>
   </div>
 
@@ -32,19 +32,16 @@
       const errorDiv = document.getElementById('error');
       errorDiv.style.display = 'none';
 
-      // Verify passcode entry
       if (inputKey === "1216") {
-        // Look at the web link scanned by the camera and parse out the folder parameter
         const urlParams = new URLSearchParams(window.location.search);
-        const folderName = urlParams.get('folder');
+        const encryptedTarget = urlParams.get('target');
 
-        if (folderName) {
-          // FIXED PATHWAY: Point directly to the specific inner directory node inside the sandbox container
-          const targetUrl = `shareddocuments://com.apple.CloudDocs/Documents/Scriptable/Patient_Vault/${encodeURIComponent(folderName)}`;
-          window.location.href = targetUrl;
+        if (encryptedTarget) {
+          // Decode the unique folder destination and jump straight inside it!
+          const directCloudFolder = atob(encryptedTarget);
+          window.location.href = directCloudFolder;
         } else {
-          // Fallback if accessed without an explicit subfolder query matching data
-          window.location.href = `shareddocuments://com.apple.CloudDocs/Documents/Scriptable/Patient_Vault`;
+          alert("Error: No patient folder code detected in this QR scan.");
         }
       } else {
         errorDiv.style.display = 'block';
