@@ -23,7 +23,12 @@
 
   <script>
     // Initialize Supabase
-    const supabase = supabase.createClient('YOUR_URL', 'YOUR_ANON_KEY');
+    // Replace the values inside the quotes with your actual keys from the screenshot
+const supabase = supabase.createClient(
+  'https://otrtkhzaojqodpmeuelb.supabase.co', 
+  'sb_publishable_Kgn_Uir2uPco2gJ_X34CvQ_XMIrOZoy'
+);
+
 
     async function saveData() {
       document.getElementById('status').innerText = "Saving...";
