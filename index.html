@@ -34,14 +34,17 @@
 
       if (inputKey === "1216") {
         const urlParams = new URLSearchParams(window.location.search);
-        const encryptedTarget = urlParams.get('target');
+        const encodedFolder = urlParams.get('folder');
 
-        if (encryptedTarget) {
-          // Decode the unique folder destination and jump straight inside it!
-          const directCloudFolder = atob(encryptedTarget);
-          window.location.href = directCloudFolder;
+        if (encodedFolder) {
+          // Decode the folder title directly inside the browser sandbox environment
+          const folderName = decodeURIComponent(atob(encodedFolder));
+          
+          // Execute native deep link call directly into the specific subfolder target path
+          window.location.href = `shareddocuments://com.apple.CloudDocs/Documents/Scriptable/Patient_Vault/${encodeURIComponent(folderName)}`;
         } else {
-          alert("Error: No patient folder code detected in this QR scan.");
+          // Fallback pathway
+          window.location.href = `shareddocuments://com.apple.CloudDocs/Documents/Scriptable/Patient_Vault`;
         }
       } else {
         errorDiv.style.display = 'block';
