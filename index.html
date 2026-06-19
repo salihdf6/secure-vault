@@ -27,66 +27,28 @@
   </div>
 
   <script>
-    function decryptWithAES(cipherText, typedKey) {
-      try {
-        const rawPayload = atob(cipherText);
-        const parts = rawPayload.split("::");
-        const cleanUrlBase64 = parts[0];
-        const encryptedSecretKeyBase64 = parts[1];
-        
-        if (atob(encryptedSecretKeyBase64) === typedKey) {
-          return atob(cleanUrlBase64);
-        } else {
-          return null;
-        }
-      } catch(e) {
-        return null;
-      }
-    }
-
-    async function unlockPortal() {
+    function unlockPortal() {
       const inputKey = document.getElementById('vaultKey').value;
       const errorDiv = document.getElementById('error');
       errorDiv.style.display = 'none';
 
-      // STEP 1: Look at the commit log history metadata of the file. 
-      // This is CORS friendly and updates instantly the millisecond a change is pushed!
-      const cacheBuster = new Date().getTime();
-      const metaUrl = `https://api.github.com/repos/salihdf6/secure-vault/commits?path=encrypted_data.json&cb=${cacheBuster}`;
+      // Verify the hardcoded passcode door lock
+      if (inputKey === "1216") {
+        // Look at the web link scanned by the camera and parse out the folder parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const folderName = urlParams.get('folder');
 
-      try {
-        let metaResponse = await fetch(metaUrl, { cache: "no-store" });
-        let commits = await metaResponse.json();
-        
-        if (!commits || commits.length === 0) {
-          alert("Could not find any data file history inside repository.");
-          return;
-        }
-
-        // Grab the precise, latest unique commit hash value
-        const latestCommitSha = commits[0].sha;
-
-        // STEP 2: Fetch the file pointing directly to that exact commit version. 
-        // This stops GitHub from serving cached versions because the URL is completely unique every time!
-        const fileUrl = `https://api.github.com/repos/salihdf6/secure-vault/contents/encrypted_data.json?ref=${latestCommitSha}`;
-        
-        let fileResponse = await fetch(fileUrl, { cache: "no-store" });
-        let fileMeta = await fileResponse.json();
-        
-        // Base64 decode GitHub's API response wrapper payload safely
-        let rawJsonContent = JSON.parse(atob(fileMeta.content.replace(/\n/g, '')));
-        
-        let targetFolderUrl = decryptWithAES(rawJsonContent.data, inputKey);
-        
-        if (targetFolderUrl) {
-          window.location.href = targetFolderUrl;
+        if (folderName) {
+          // Construct the deep link to the brand new specific subfolder instantly!
+          const targetUrl = `shareddocuments://com.apple.CloudDocs/Documents/Scriptable/Patient_Vault/${encodeURIComponent(folderName)}`;
+          window.location.href = targetUrl;
         } else {
-          errorDiv.style.display = 'block';
-          document.getElementById('vaultKey').value = '';
+          // Fallback if accessed without a QR code parameter
+          window.location.href = `shareddocuments://com.apple.CloudDocs/Documents/Scriptable/Patient_Vault`;
         }
-      } catch (error) {
-        console.error(error);
-        alert("Error pulling live workspace path from repository layout.");
+      } else {
+        errorDiv.style.display = 'block';
+        document.getElementById('vaultKey').value = '';
       }
     }
   </script>
