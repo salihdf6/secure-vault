@@ -19,10 +19,10 @@
 
   <div class="vault-card">
     <h2>Secure Vault Portal</h2>
-    <p>Enter master passcode to unlock this patient's direct folder workspace.</p>
+    <p>Enter master passcode to unlock shared patient workspaces.</p>
     
     <input type="password" id="vaultKey" placeholder="••••" maxlength="8">
-    <button onclick="unlockPortal()">Unlock Workspace</button>
+    <button onclick="unlockPortal()">Unlock Vault</button>
     <div class="error-msg" id="error">Invalid passcode. Access denied.</div>
   </div>
 
@@ -33,19 +33,13 @@
       errorDiv.style.display = 'none';
 
       if (inputKey === "1216") {
-        const urlParams = new URLSearchParams(window.location.search);
-        const encodedFolder = urlParams.get('folder');
+        
+        // PASTE YOUR COPIED ICLOUD SHARED LINK IN THE QUOTES BELOW:
+        const masterSharedVaultUrl = "PASTE_YOUR_COPIED_ICLOUD_SHARE_LINK_HERE";
 
-        if (encodedFolder) {
-          // Decode the folder title directly inside the browser sandbox environment
-          const folderName = decodeURIComponent(atob(encodedFolder));
-          
-          // Execute native deep link call directly into the specific subfolder target path
-          window.location.href = `shareddocuments://com.apple.CloudDocs/Documents/Scriptable/Patient_Vault/${encodeURIComponent(folderName)}`;
-        } else {
-          // Fallback pathway
-          window.location.href = `shareddocuments://com.apple.CloudDocs/Documents/Scriptable/Patient_Vault`;
-        }
+        // Route the browser straight to your shared directory canvas
+        window.location.href = masterSharedVaultUrl;
+
       } else {
         errorDiv.style.display = 'block';
         document.getElementById('vaultKey').value = '';
