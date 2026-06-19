@@ -1,31 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Include Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: -apple-system, sans-serif; background-color: #f2f2f7; padding: 20px; }
+    .form-card { background: #fff; padding: 20px; border-radius: 12px; max-width: 600px; margin: 0 auto; }
+    input, textarea { width: 100%; margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+    button { background-color: #007aff; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; }
+  </style>
 </head>
 <body>
-  <!-- Paste your HTML Form code here (the same form you had in Scriptable) -->
-  
+  <div class="form-card">
+    <h2>New Cloud Patient Entry</h2>
+    <input type="text" id="pName" placeholder="Patient Name">
+    <input type="text" id="pFileNo" placeholder="File No.">
+    <textarea id="pOpNotes" placeholder="Operative Notes"></textarea>
+    <button onclick="saveData()">Save to Database</button>
+    <p id="status"></p>
+  </div>
+
   <script>
-    // 1. Initialize Supabase
-    const supabase = supabase.createClient('YOUR_URL_HERE', 'YOUR_ANON_KEY_HERE');
+    // Initialize Supabase
+    const supabase = supabase.createClient('YOUR_URL', 'YOUR_ANON_KEY');
 
-    // 2. Updated Submit Function
-    async function executeSubmit() {
-      const data = {
-        name: document.getElementById('pName').value,
-        file_no: document.getElementById('pFileNo').value,
-        // ... add all other fields here ...
-      };
-
-      const { error } = await supabase.from('patients').insert([data]);
+    async function saveData() {
+      document.getElementById('status').innerText = "Saving...";
       
+      const { error } = await supabase.from('patients').insert([
+        { 
+          name: document.getElementById('pName').value,
+          file_no: document.getElementById('pFileNo').value,
+          op_notes: document.getElementById('pOpNotes').value
+        }
+      ]);
+
       if (error) {
-        alert("Error: " + error.message);
+        document.getElementById('status').innerText = "Error: " + error.message;
       } else {
-        alert("Success! Data saved to cloud.");
+        document.getElementById('status').innerText = "✅ Saved Successfully!";
       }
     }
   </script>
