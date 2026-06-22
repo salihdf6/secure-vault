@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        button { width: 90%; padding: 20px; margin: 10px; font-size: 18px; border-radius: 12px; border: none; background: #007aff; color: white; }
+    </style>
+</head>
+<body>
+    <h2 id="pName">Patient Portal</h2>
+    <button onclick="viewFolder()">1. View Patient Folder</button>
+    <button onclick="uploadData()">2. Upload Data</button>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const data = JSON.parse(atob(params.get('data')));
+        document.getElementById('pName').innerText = data.patient;
+
+        function viewFolder() { window.location.href = data.shareUrl; }
+
+        function uploadData() {
+            // Note: Dropbox does not allow direct file uploads from a simple web page 
+            // without an OAuth backend. For a mobile-friendly experience, 
+            // the best way is to trigger a "File Request" link.
+            alert("To upload, ensure you have the Dropbox File Request link configured for this folder.");
+        }
+    </script>
+</body>
+</html>
