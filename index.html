@@ -1,34 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinical Portal</title>
-    <style>
-        body { font-family: -apple-system, sans-serif; text-align: center; padding: 20px; background: #f2f2f7; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        button { 
-            display: block; width: 100%; padding: 18px; margin: 15px 0; 
-            font-size: 17px; font-weight: 600; border-radius: 10px; 
-            border: none; color: white; cursor: pointer;
-        }
-        .btn-view { background: #007aff; }
-        .btn-upload { background: #34c759; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Patient Data</title>
+<style>
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f2f2f7;display:flex;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.15);padding:24px;max-width:420px;width:100%}
+h1,h2{text-align:center;margin:0 0 16px}
+input{width:100%;padding:12px;font-size:16px;border:1px solid #ccc;border-radius:10px;box-sizing:border-box}
+button{width:100%;padding:14px;margin-top:14px;border:none;border-radius:10px;font-size:16px;font-weight:600;color:#fff;cursor:pointer}
+.primary{background:#007aff}
+.green{background:#34c759}
+.hidden{display:none}
+.note{font-size:13px;color:#666;text-align:center;margin-top:10px}
+</style>
 </head>
 <body>
-    <div class="card">
-        <h2 id="pName">Patient Record</h2>
-        <button class="btn-view" onclick="viewFolder()">1. View Patient Folder</button>
-        <button class="btn-upload" onclick="uploadData()">2. Upload Data (Camera/Gallery)</button>
-    </div>
+<div class="card">
+<div id="login">
+<h1>Patient Data</h1>
+<p>Enter access code</p>
+<input id="code" type="password" placeholder="Access code">
+<button class="primary" onclick="unlock()">Continue</button>
+<p id="err" style="color:red"></p>
+</div>
 
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const data = JSON.parse(atob(params.get('data')));
-        document.getElementById('pName').innerText = data.patient;
+<div id="portal" class="hidden">
+<h2>Patient Data</h2>
+<p><strong>Patient:</strong> <span id="patient"></span></p>
+<button class="primary" onclick="viewFolder()">ð View Folder</button>
+<button class="green" onclick="pickFile()">ð¤ Upload File</button>
+<input id="file" type="file" class="hidden">
+<p id="status" class="note"></p>
+</div>
+</div>
 
-        function viewFolder() { window.location.href = data.shareUrl; }
-        function uploadData() { window.location.href = data.uploadLink; }
-    </script>
+<script>
+const PASSCODE="1216";
+let payload=null;
+
+function decodePayload(){
+ const p=new URLSearchParams(location.search);
+ const raw=p.get("data");
+ if(!raw){document.body.innerHTML="<h2>Missing QR data.</h2>";return;}
+ try{
+   payload=JSON.parse(atob(raw));
+ }catch(e){
+   document.body.innerHTML="<h2>Invalid QR data.</h2>";
+ }
+}
+
+decodePayload();
+
+function unlock(){
+ const c=document.getElementById("code").value;
+ if(c!==PASSCODE){
+   document.getElementById("err").textContent="Incorrect access code.";
+   return;
+ }
+ document.getElementById("login").classList.add("hidden");
+ document.getElementById("portal").classList.remove("hidden");
+ document.getElementById("patient").textContent=payload.patient||"Unknown";
+}
+
+function viewFolder(){
+ window.location.href=payload.shareUrl;
+}
+
+function pickFile(){
+ document.getElementById("file").click();
+}
+
+document.getElementById("file").addEventListener("change", async e=>{
+ if(!e.target.files.length)return;
+ const status=document.getElementById("status");
+ status.textContent="Ready to upload: "+e.target.files[0].name;
+ // TODO Version 2:
+ // POST file + payload.folder to your Supabase Edge Function.
+ // Example:
+ // const fd=new FormData();
+ // fd.append("file", e.target.files[0]);
+ // fd.append("folder", payload.folder);
+ // await fetch("https://YOUR-PROJECT.functions.supabase.co/upload-file",{method:"POST",body:fd});
+});
+</script>
 </body>
 </html>
