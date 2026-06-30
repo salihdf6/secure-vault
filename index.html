@@ -77,13 +77,58 @@ document.getElementById("file").addEventListener("change", async e=>{
  const status=document.getElementById("status");
  status.textContent="Ready to upload: "+e.target.files[0].name;
  // TODO Version 2:
- // POST file + payload.folder to your Supabase Edge Function.
- // Example:
- // const fd=new FormData();
- // fd.append("file", e.target.files[0]);
- // fd.append("folder", payload.folder);
- // await fetch("https://YOUR-PROJECT.functions.supabase.co/upload-file",{method:"POST",body:fd});
+ let selectedFile = null;
+
+document.getElementById("file").addEventListener("change", e => {
+  if (!e.target.files.length) return;
+
+  selectedFile = e.target.files[0];
+  document.getElementById("status").textContent =
+    "Ready to upload: " + selectedFile.name;
+
+  document.getElementById("uploadBtn").classList.remove("hidden");
 });
+
+async function uploadSelectedFile() {
+  if (!selectedFile) return;
+
+  const status = document.getElementById("status");
+  status.textContent = "Uploading...";
+
+  const fd = new FormData();
+  fd.append("file", selectedFile);
+  fd.append("folder", payload.folder);
+
+  try {
+    const res = await fetch(
+      "https://flszaiujzmwkfvsxxfpb.supabase.co/functions/v1/upload-file",
+      { method: "POST", body: fd }
+    );
+
+    const result = await res.json();
+
+    if (!res.ok) throw new Error(result.error || "Upload failed");
+
+    status.textContent = "Upload successful ✅";
+
+    selectedFile = null;
+    document.getElementById("file").value = "";
+    document.getElementById("uploadBtn").classList.add("hidden");
+
+  } catch (err) {
+    status.textContent = "❌ " + err.message;
+  }
+}
+
+/*
+Also add this button below the hidden file input:
+
+<button id="uploadBtn"
+        class="green hidden"
+        onclick="uploadSelectedFile()">
+Upload Selected File
+</button>
+*/
 </script>
 </body>
 </html>
