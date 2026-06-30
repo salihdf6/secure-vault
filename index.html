@@ -29,9 +29,10 @@ button{width:100%;padding:14px;margin-top:14px;border:none;border-radius:10px;fo
 <div id="portal" class="hidden">
 <h2>Patient Data</h2>
 <p><strong>Patient:</strong> <span id="patient"></span></p>
-<button class="primary" onclick="viewFolder()">📁 View Folder</button>
-<button class="green" onclick="pickFile()">📷 Upload File</button>
+<button class="primary" onclick="viewFolder()">ð View Folder</button>
+<button class="green" onclick="pickFile()">ð· Upload File</button>
 <input id="file" type="file" class="hidden">
+<button id="uploadBtn" class="green hidden" onclick="uploadSelectedFile()">â¬ï¸ Upload Selected File</button>
 <p id="status" class="note"></p>
 </div>
 </div>
@@ -39,6 +40,8 @@ button{width:100%;padding:14px;margin-top:14px;border:none;border-radius:10px;fo
 <script>
 const PASSCODE="1216";
 let payload=null;
+let selectedFile=null;
+const UPLOAD_URL="https://flszaiujzmwkfvsxxfpb.supabase.co/functions/v1/upload-file";
 
 function decodePayload(){
  const p=new URLSearchParams(location.search);
@@ -72,63 +75,33 @@ function pickFile(){
  document.getElementById("file").click();
 }
 
-document.getElementById("file").addEventListener("change", async e=>{
+document.getElementById("file").addEventListener("change",e=>{
  if(!e.target.files.length)return;
- const status=document.getElementById("status");
- status.textContent="Ready to upload: "+e.target.files[0].name;
- // TODO Version 2:
- let selectedFile = null;
-
-document.getElementById("file").addEventListener("change", e => {
-  if (!e.target.files.length) return;
-
-  selectedFile = e.target.files[0];
-  document.getElementById("status").textContent =
-    "Ready to upload: " + selectedFile.name;
-
-  document.getElementById("uploadBtn").classList.remove("hidden");
+ selectedFile=e.target.files[0];
+ document.getElementById("status").textContent="Ready to upload: "+selectedFile.name;
+ document.getElementById("uploadBtn").classList.remove("hidden");
 });
 
-async function uploadSelectedFile() {
-  if (!selectedFile) return;
-
-  const status = document.getElementById("status");
-  status.textContent = "Uploading...";
-
-  const fd = new FormData();
-  fd.append("file", selectedFile);
-  fd.append("folder", payload.folder);
-
-  try {
-    const res = await fetch(
-      "https://flszaiujzmwkfvsxxfpb.supabase.co/functions/v1/upload-file",
-      { method: "POST", body: fd }
-    );
-
-    const result = await res.json();
-
-    if (!res.ok) throw new Error(result.error || "Upload failed");
-
-    status.textContent = "Upload successful ✅";
-
-    selectedFile = null;
-    document.getElementById("file").value = "";
-    document.getElementById("uploadBtn").classList.add("hidden");
-
-  } catch (err) {
-    status.textContent = "❌ " + err.message;
-  }
+async function uploadSelectedFile(){
+ if(!selectedFile)return;
+ const status=document.getElementById("status");
+ status.textContent="Uploading...";
+ const fd=new FormData();
+ fd.append("file",selectedFile);
+ fd.append("folder",payload.folder);
+ try{
+  const res=await fetch(UPLOAD_URL,{method:"POST",body:fd});
+  const result=await res.json();
+  if(!res.ok) throw new Error(result.error||"Upload failed");
+  status.textContent="Upload successful â";
+  selectedFile=null;
+  document.getElementById("file").value="";
+  document.getElementById("uploadBtn").classList.add("hidden");
+ }catch(err){
+  status.textContent="â "+err.message;
+ }
 }
-
-/*
-Also add this button below the hidden file input:
-
-<button id="uploadBtn"
-        class="green hidden"
-        onclick="uploadSelectedFile()">
-Upload Selected File
-</button>
-*/
 </script>
 </body>
 </html>
+
