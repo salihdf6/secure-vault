@@ -56,15 +56,22 @@ function decodePayload(){
 
 decodePayload();
 
-function unlock(){
- const c=document.getElementById("code").value;
- if(c!==PASSCODE){
-   document.getElementById("err").textContent="Incorrect access code.";
-   return;
- }
- document.getElementById("login").classList.add("hidden");
- document.getElementById("portal").classList.remove("hidden");
- document.getElementById("patient").textContent=payload.patient||"Unknown";
+function unlock() {
+  const c = document.getElementById("code").value;
+
+  if (c !== PASSCODE) {
+    document.getElementById("err").textContent = "Incorrect access code.";
+    return;
+  }
+
+  if (!payload) {
+    alert("QR payload could not be loaded.");
+    return;
+  }
+
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("portal").classList.remove("hidden");
+  document.getElementById("patient").textContent = payload.patient || "Unknown";
 }
 
 function viewFolder(){
