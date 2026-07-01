@@ -113,7 +113,10 @@ async function uploadSelectedFile() {
     const fd = new FormData();
 
     fd.append("file", selectedFiles[i]);
-    fd.append("folder", payload.folder);
+    fd.append(
+  "folder_b64",
+  btoa(unescape(encodeURIComponent(payload.folder)))
+);
 
     const res = await fetch(UPLOAD_URL, {
       method: "POST",
