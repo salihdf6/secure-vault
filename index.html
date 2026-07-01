@@ -117,14 +117,16 @@ alert(selectedFiles[i].type);
 
 fd.append("file", selectedFiles[i]);
 
-fd.append("folder_b64", "TEST");
+const folder64 = btoa(unescape(encodeURIComponent(payload.folder)));
 
-const res = await fetch("https://example.com", {
+fd.append("folder_b64", folder64);
+
+const res = await fetch(UPLOAD_URL, {
   method: "POST",
   body: fd
 });
 
-    const result = await res.json();
+const result = await res.json();
 
     if (!res.ok) {
       status.textContent =
