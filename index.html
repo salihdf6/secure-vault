@@ -125,9 +125,15 @@ alert(selectedFiles[i].type);
 
 fd.append("file", selectedFiles[i]);
 
-const folder64 = btoa(unescape(encodeURIComponent(payload.folder)));
-fd.append("folder_b64", folder64);
+const encoder = new TextEncoder();
+const bytes = encoder.encode(payload.folder);
 
+let binary = "";
+for (const b of bytes) {
+  binary += String.fromCharCode(b);
+}
+
+const folder64 = btoa(binary);
 const res = await fetch(UPLOAD_URL, {
   method: "POST",
   body: fd
