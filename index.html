@@ -78,12 +78,12 @@ function unlock() {
   document.getElementById("patient").textContent = payload.patient || "Unknown";
 }
 
-function viewFolder(){
- window.location.href=payload.shareUrl;
+function viewFolder() {
+  alert(payload.shareUrl);
 }
 
-function pickFile(){
- document.getElementById("file").click();
+function pickFile() {
+  alert(payload.folder);
 }
 
 document.getElementById("file").addEventListener("change", e => {
