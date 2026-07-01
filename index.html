@@ -38,6 +38,14 @@ button{width:100%;padding:14px;margin-top:14px;border:none;border-radius:10px;fo
 </div>
 
 <script>
+window.onerror = function(message, source, line, col, error) {
+  alert(
+    "ERROR:\n\n" +
+    message +
+    "\n\nLine: " + line +
+    "\n\nSource:\n" + source
+  );
+};
 const PASSCODE="1216";
 let payload = null;
 let selectedFiles = [];
