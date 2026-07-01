@@ -111,7 +111,8 @@ async function uploadSelectedFile() {
 
     status.textContent =
       `Uploading ${i + 1} of ${selectedFiles.length}...`;
-
+alert(selectedFiles[i].name);
+alert(selectedFiles[i].type);
     const fd = new FormData();
 
 fd.append("file", selectedFiles[i]);
