@@ -46,7 +46,13 @@ const UPLOAD_URL = "https://flszaiujzmwkfvsxxfpb.supabase.co/functions/v1/upload
  const raw=p.get("data");
  if(!raw){document.body.innerHTML="<h2>Missing QR data.</h2>";return;}
  try{
-   payload=JSON.parse(atob(raw));
+   const decoded = decodeURIComponent(
+  Array.from(atob(raw))
+    .map(c => "%" + c.charCodeAt(0).toString(16).padStart(2, "0"))
+    .join("")
+);
+
+payload = JSON.parse(decoded);
  }catch(e){
    document.body.innerHTML="<h2>Invalid QR data.</h2>";
  }
