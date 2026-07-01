@@ -118,7 +118,6 @@ alert(selectedFiles[i].type);
 fd.append("file", selectedFiles[i]);
 
 const folder64 = btoa(unescape(encodeURIComponent(payload.folder)));
-
 fd.append("folder_b64", folder64);
 
 const res = await fetch(UPLOAD_URL, {
@@ -127,7 +126,6 @@ const res = await fetch(UPLOAD_URL, {
 });
 
 const result = await res.json();
-
     if (!res.ok) {
       status.textContent =
         "❌ " + (result.error || "Upload failed");
