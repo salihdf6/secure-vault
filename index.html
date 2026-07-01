@@ -41,21 +41,23 @@ button{width:100%;padding:14px;margin-top:14px;border:none;border-radius:10px;fo
 const PASSCODE="1216";
 let payload = null;
 let selectedFiles = [];
-const UPLOAD_URL = "https://flszaiujzmwkfvsxxfpb.supabase.co/functions/v1/upload-file";function decodePayload(){
- const p=new URLSearchParams(location.search);
- const raw=p.get("data");
- if(!raw){document.body.innerHTML="<h2>Missing QR data.</h2>";return;}
- try{
-   const decoded = decodeURIComponent(
-  Array.from(atob(raw))
-    .map(c => "%" + c.charCodeAt(0).toString(16).padStart(2, "0"))
-    .join("")
-);
+const UPLOAD_URL = "https://flszaiujzmwkfvsxxfpb.supabase.co/functions/v1/upload-file";
+function decodePayload() {
+  const p = new URLSearchParams(location.search);
+  const raw = p.get("data");
 
-payload = JSON.parse(decoded);
- }catch(e){
-   document.body.innerHTML="<h2>Invalid QR data.</h2>";
- }
+  if (!raw) {
+    document.body.innerHTML = "<h2>Missing QR data.</h2>";
+    return;
+  }
+
+  try {
+    const decoded = decodeURIComponent(atob(raw));
+    payload = JSON.parse(decoded);
+  } catch (e) {
+    document.body.innerHTML = "<h2>Invalid QR data.</h2>";
+    console.error(e);
+  }
 }
 
 decodePayload();
