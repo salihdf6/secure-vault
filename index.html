@@ -118,7 +118,7 @@ fd.append("file", selectedFiles[i]);
 
 fd.append("folder_b64", "TEST");
 
-const res = await fetch(UPLOAD_URL, {
+const res = await fetch("https://example.com", {
   method: "POST",
   body: fd
 });
