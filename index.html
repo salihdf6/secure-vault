@@ -125,16 +125,7 @@ alert(selectedFiles[i].type);
 
 fd.append("file", selectedFiles[i]);
 
-const encoder = new TextEncoder();
-const bytes = encoder.encode(payload.folder);
-
-let binary = "";
-for (const b of bytes) {
-  binary += String.fromCharCode(b);
-}
-
-const folder64 = btoa(binary);
-fd.append("folder_b64", folder64);
+fd.append("folder", payload.folder);
 const res = await fetch(UPLOAD_URL, {
   method: "POST",
   body: fd
