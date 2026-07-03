@@ -1,155 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Patient Data</title>
-<style>
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f2f2f7;display:flex;justify-content:center;padding:20px}
-.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.15);padding:24px;max-width:420px;width:100%}
-h1,h2{text-align:center;margin:0 0 16px}
-input{width:100%;padding:12px;font-size:16px;border:1px solid #ccc;border-radius:10px;box-sizing:border-box}
-button{width:100%;padding:14px;margin-top:14px;border:none;border-radius:10px;font-size:16px;font-weight:600;color:#fff;cursor:pointer}
-.primary{background:#007aff}
-.green{background:#34c759}
-.hidden{display:none}
-.note{font-size:13px;color:#666;text-align:center;margin-top:10px}
-</style>
+<title>Opening...</title>
 </head>
 <body>
-<div class="card">
-<div id="login">
-<h1>Patient Data</h1>
-<p>Enter access code</p>
-<input id="code" type="password" placeholder="Access code">
-<button class="primary" onclick="unlock()">Continue</button>
-<p id="err" style="color:red"></p>
-</div>
 
-<div id="portal" class="hidden">
-<h2>Patient Data</h2>
-<p><strong>Patient:</strong> <span id="patient"></span></p>
-<button class="primary" onclick="viewFolder()">📂 View Folder</button>
-<button class="green" onclick="pickFile()">⬆️ Upload File</button>
-<input id="file" type="file" class="hidden" multiple>
-<button id="uploadBtn" class="green hidden" onclick="uploadSelectedFile()">✅ Upload Selected File</button>
-<p id="status" class="note"></p>
-</div>
-</div>
+Opening Dropbox...
 
 <script>
-window.onerror = function(message, source, line, col, error) {
-  alert(
-    "ERROR:\n\n" +
-    message +
-    "\n\nLine: " + line +
-    "\n\nSource:\n" + source
-  );
-};
-const PASSCODE="1216";
-let payload = null;
-let selectedFiles = [];
-const UPLOAD_URL = "https://flszaiujzmwkfvsxxfpb.supabase.co/functions/v1/upload-file";
-function decodePayload() {
-  const p = new URLSearchParams(location.search);
-  const raw = p.get("data");
+const params = new URLSearchParams(location.search);
+const data = params.get("data");
 
-  if (!raw) {
-    document.body.innerHTML = "<h2>Missing QR data.</h2>";
-    return;
-  }
+// Try Scriptable first
+window.location =
+`scriptable:///run?scriptName=OpenDropbox&data=${encodeURIComponent(data)}`;
 
-  try {
-    const decoded = decodeURIComponent(atob(raw));
-    payload = JSON.parse(decoded);
-  } catch (e) {
-    document.body.innerHTML = "<h2>Invalid QR data.</h2>";
-    console.error(e);
-  }
-}
-
-decodePayload();
-
-function unlock() {
-  const c = document.getElementById("code").value;
-
-  if (c !== PASSCODE) {
-    document.getElementById("err").textContent = "Incorrect access code.";
-    return;
-  }
-
-  if (!payload) {
-    alert("QR payload could not be loaded.");
-    return;
-  }
-
-  document.getElementById("login").classList.add("hidden");
-  document.getElementById("portal").classList.remove("hidden");
-  document.getElementById("patient").textContent = payload.patient || "Unknown";
-}
-
-function viewFolder(){
- window.location.href=payload.shareUrl;
-}
-
-function pickFile(){
- document.getElementById("file").click();
-}
-
-document.getElementById("file").addEventListener("change", e => {
-
-  if (!e.target.files.length) return;
-
-  selectedFiles = [...e.target.files];
-
-  document.getElementById("status").textContent =
-    `${selectedFiles.length} file(s) ready to upload`;
-
-  document.getElementById("uploadBtn").classList.remove("hidden");
-
-});
-
-async function uploadSelectedFile() {
-
-  if (!selectedFiles.length) return;
-
-  const status = document.getElementById("status");
-
-  for (let i = 0; i < selectedFiles.length; i++) {
-
-    status.textContent =
-      `Uploading ${i + 1} of ${selectedFiles.length}...`;
-
-    const fd = new FormData();
-
-fd.append("file", selectedFiles[i]);
-
-fd.append("folder", payload.folder);
-const res = await fetch(UPLOAD_URL, {
-  method: "POST",
-  body: fd
-});
-
-const result = await res.json();
-    if (!res.ok) {
-      status.textContent =
-        "❌ " + (result.error || "Upload failed");
-      return;
-    }
-
-  }
-
-  status.textContent =
-    `${selectedFiles.length} file(s) uploaded successfully ✅`;
-
-  selectedFiles = [];
-
-  document.getElementById("file").value = "";
-
-  document.getElementById("uploadBtn").classList.add("hidden");
-
-}
+// If Scriptable isn't installed, continue with the current web workflow
+setTimeout(() => {
+  window.location =
+`https://salihdf6.github.io/secure-vault/?data=${encodeURIComponent(data)}`;
+}, 1200);
 </script>
+
 </body>
 </html>
-
