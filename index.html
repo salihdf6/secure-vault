@@ -14,7 +14,7 @@ const data = params.get("data");
 
 // Try Scriptable first
 window.location =
-`scriptable:///run?scriptName=OpenDropbox&data=${encodeURIComponent(data)}`;
+`scriptable:///run?scriptName=OpenDropbox&url=${encodeURIComponent(dropboxURL)}`;
 
 // If Scriptable isn't installed, continue with the current web workflow
 setTimeout(() => {
