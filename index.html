@@ -64,10 +64,28 @@ function unlock(){
  document.getElementById("patient").textContent=payload.patient||"Unknown";
 }
 
-function viewFolder(){
- window.location.href=payload.shareUrl;
-}
+function viewFolder() {
+  if (!payload || !payload.shareUrl) {
+    alert("Folder link not available.");
+    return;
+  }
 
+  // Force browser-open by using a hidden link click
+  // This bypasses iOS Universal Links that redirect to App Store
+  const url = payload.shareUrl.split('?')[0] + '?dl=0';
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+
+  // Clean up
+  setTimeout(() => {
+    if (a.parentNode) document.body.removeChild(a);
+  }, 100);
+}
 function pickFile(){
  document.getElementById("file").click();
 }
