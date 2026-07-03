@@ -29,7 +29,7 @@ button{width:100%;padding:14px;margin-top:14px;border:none;border-radius:10px;fo
 <div id="portal" class="hidden">
 <h2>Patient Data</h2>
 <p><strong>Patient:</strong> <span id="patient"></span></p>
-<button class="primary" onclick="viewFolder()">📂 View Folder</button>
+<button class="primary" onclick="openFolderDirect()">📂 View Folder</button>
 <button class="green" onclick="pickFile()">⬆️ Upload File</button>
 <input id="file" type="file" class="hidden" multiple>
 <button id="uploadBtn" class="green hidden" onclick="uploadSelectedFile()">✅ Upload Selected File</button>
@@ -66,27 +66,12 @@ function unlock(){
  document.getElementById("patient").textContent=payload.patient||"Unknown";
 }
 
-function viewFolder() {
+function openFolderDirect() {
   if (!payload || !payload.shareUrl) {
     alert("Folder link not available.");
     return;
   }
-
-  // Force browser-open by using a hidden link click
-  // This bypasses iOS Universal Links that redirect to App Store
-  const url = payload.shareUrl.split('?')[0] + '?dl=0';
-  const a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-
-  // Clean up
-  setTimeout(() => {
-    if (a.parentNode) document.body.removeChild(a);
-  }, 100);
+  window.open(payload.shareUrl, '_blank');
 }
 
 function pickFile(){
