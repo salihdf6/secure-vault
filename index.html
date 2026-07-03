@@ -29,63 +29,39 @@ button{width:100%;padding:14px;margin-top:14px;border:none;border-radius:10px;fo
 <div id="portal" class="hidden">
 <h2>Patient Data</h2>
 <p><strong>Patient:</strong> <span id="patient"></span></p>
-<button class="primary" onclick="viewFolder()">📂 View Folder</button>
-<button class="green" onclick="pickFile()">⬆️ Upload File</button>
-<input id="file" type="file" class="hidden" multiple>
-<button id="uploadBtn" class="green hidden" onclick="uploadSelectedFile()">✅ Upload Selected File</button>
+<button class="primary" onclick="viewFolder()">ð View Folder</button>
+<button class="green" onclick="pickFile()">ð¤ Upload File</button>
+<input id="file" type="file" class="hidden">
 <p id="status" class="note"></p>
 </div>
 </div>
 
 <script>
-window.onerror = function(message, source, line, col, error) {
-  alert(
-    "ERROR:\n\n" +
-    message +
-    "\n\nLine: " + line +
-    "\n\nSource:\n" + source
-  );
-};
 const PASSCODE="1216";
-let payload = null;
-let selectedFiles = [];
-const UPLOAD_URL = "https://flszaiujzmwkfvsxxfpb.supabase.co/functions/v1/upload-file";
-function decodePayload() {
-  const p = new URLSearchParams(location.search);
-  const raw = p.get("data");
+let payload=null;
 
-  if (!raw) {
-    document.body.innerHTML = "<h2>Missing QR data.</h2>";
-    return;
-  }
-
-  try {
-    const decoded = decodeURIComponent(atob(raw));
-    payload = JSON.parse(decoded);
-  } catch (e) {
-    document.body.innerHTML = "<h2>Invalid QR data.</h2>";
-    console.error(e);
-  }
+function decodePayload(){
+ const p=new URLSearchParams(location.search);
+ const raw=p.get("data");
+ if(!raw){document.body.innerHTML="<h2>Missing QR data.</h2>";return;}
+ try{
+   payload=JSON.parse(atob(raw));
+ }catch(e){
+   document.body.innerHTML="<h2>Invalid QR data.</h2>";
+ }
 }
 
 decodePayload();
 
-function unlock() {
-  const c = document.getElementById("code").value;
-
-  if (c !== PASSCODE) {
-    document.getElementById("err").textContent = "Incorrect access code.";
-    return;
-  }
-
-  if (!payload) {
-    alert("QR payload could not be loaded.");
-    return;
-  }
-
-  document.getElementById("login").classList.add("hidden");
-  document.getElementById("portal").classList.remove("hidden");
-  document.getElementById("patient").textContent = payload.patient || "Unknown";
+function unlock(){
+ const c=document.getElementById("code").value;
+ if(c!==PASSCODE){
+   document.getElementById("err").textContent="Incorrect access code.";
+   return;
+ }
+ document.getElementById("login").classList.add("hidden");
+ document.getElementById("portal").classList.remove("hidden");
+ document.getElementById("patient").textContent=payload.patient||"Unknown";
 }
 
 function viewFolder(){
@@ -96,60 +72,18 @@ function pickFile(){
  document.getElementById("file").click();
 }
 
-document.getElementById("file").addEventListener("change", e => {
-
-  if (!e.target.files.length) return;
-
-  selectedFiles = [...e.target.files];
-
-  document.getElementById("status").textContent =
-    `${selectedFiles.length} file(s) ready to upload`;
-
-  document.getElementById("uploadBtn").classList.remove("hidden");
-
+document.getElementById("file").addEventListener("change", async e=>{
+ if(!e.target.files.length)return;
+ const status=document.getElementById("status");
+ status.textContent="Ready to upload: "+e.target.files[0].name;
+ // TODO Version 2:
+ // POST file + payload.folder to your Supabase Edge Function.
+ // Example:
+ // const fd=new FormData();
+ // fd.append("file", e.target.files[0]);
+ // fd.append("folder", payload.folder);
+ // await fetch("https://YOUR-PROJECT.functions.supabase.co/upload-file",{method:"POST",body:fd});
 });
-
-async function uploadSelectedFile() {
-
-  if (!selectedFiles.length) return;
-
-  const status = document.getElementById("status");
-
-  for (let i = 0; i < selectedFiles.length; i++) {
-
-    status.textContent =
-      `Uploading ${i + 1} of ${selectedFiles.length}...`;
-
-    const fd = new FormData();
-
-fd.append("file", selectedFiles[i]);
-
-fd.append("folder", payload.folder);
-const res = await fetch(UPLOAD_URL, {
-  method: "POST",
-  body: fd
-});
-
-const result = await res.json();
-    if (!res.ok) {
-      status.textContent =
-        "❌ " + (result.error || "Upload failed");
-      return;
-    }
-
-  }
-
-  status.textContent =
-    `${selectedFiles.length} file(s) uploaded successfully ✅`;
-
-  selectedFiles = [];
-
-  document.getElementById("file").value = "";
-
-  document.getElementById("uploadBtn").classList.add("hidden");
-
-}
 </script>
 </body>
 </html>
-
